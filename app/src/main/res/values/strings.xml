@@ -1,3 +1,40 @@
 <resources>
     <string name="app_name">Usterki</string>
+
+    <string name="header_form">Zgłoszenie usterki</string>
+    <string name="label_category">Kategoria</string>
+    <string name="label_description">Opis usterki</string>
+    <string name="label_priority">Priorytet (1-5)</string>
+    <string name="urgent">Pilne, awaria blokuje pracę</string>
+    <string name="btn_next">DALEJ</string>
+    <string name="btn_about">O aplikacji</string>
+
+    <string name="header_summary">Sprawdź zgłoszenie</string>
+    <string name="btn_confirm">POTWIERDŹ</string>
+    <string name="btn_edit">POPRAW</string>
+    <string name="btn_share">Udostępnij</string>
+
+    <string name="summary_format">Kategoria: %1$s\nOpis: %2$s\nPriorytet: %3$d/5\nPilne: %4$s</string>
+    <string name="yes_short">tak</string>
+    <string name="no_short">nie</string>
+
+    <string name="error_category">Wybierz kategorię z listy</string>
+    <string name="error_description">Opisz usterkę</string>
+
+    <string name="registered">Zgłoszono usterkę, numer %1$s</string>
+    <string name="cancelled">Wróciłeś do poprawek, zgłoszenie niewysłane</string>
+    <string name="share_via">Udostępnij przez</string>
+    <string name="error_no_app">Brak aplikacji do obsługi tej czynności</string>
+
+    <string name="header_about">O aplikacji</string>
+    <string name="about_text">Usterki 1.0\nAplikacja szkolna do zgłaszania usterek.\nAutor: uczeń klasy 5, technik programista.</string>
+    <string name="btn_close">ZAMKNIJ</string>
+
+    <string-array name="categories">
+        <item>-- wybierz kategorię --</item>
+        <item>Komputer</item>
+        <item>Sieć</item>
+        <item>Drukarka</item>
+        <item>Inne</item>
+    </string-array>
 </resources>
