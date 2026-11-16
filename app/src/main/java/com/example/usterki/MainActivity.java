@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // łączymy kod z elementami z XML
         spCategory = findViewById(R.id.spCategory);
         etDescription = findViewById(R.id.etDescription);
         sbPriority = findViewById(R.id.sbPriority);
@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnNext).setOnClickListener(v -> openSummary());
     }
 
-    // lista kategorii ze strings.xml do rozwijanej listy
     private void setUpCategorySpinner() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this, R.array.categories, android.R.layout.simple_spinner_item);
@@ -45,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         spCategory.setAdapter(adapter);
     }
 
-    // suwak liczy od 0 do 4, a użytkownikowi pokazujemy 1 do 5 (dlatego +1)
     private void setUpPrioritySeekBar() {
         tvPriorityValue.setText(String.valueOf(sbPriority.getProgress() + 1));
         sbPriority.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -62,9 +60,36 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // sprawdzamy dane PRZED przejściem na drugi ekran
+    // na pierwszym błędzie pokazujemy komunikat i przerywamy (return false)
+    private boolean validateForm() {
+        if (spCategory.getSelectedItemPosition() == 0) {   // 0 = "-- wybierz kategorię --"
+            Toast.makeText(this, R.string.error_category, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (etDescription.getText().toString().trim().isEmpty()) {
+            etDescription.setError(getString(R.string.error_description));  // czerwony błąd w polu
+            etDescription.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+
     private void openSummary() {
-        // intencja jawna: wprost wskazujemy ekran do otwarcia
+        if (!validateForm()) {
+            return;     // dane złe, nie przechodzimy dalej
+        }
+
         Intent intent = new Intent(this, SummaryActivity.class);
+
+        // 4 dodatki: tekst, tekst, liczba (int), prawda/fałsz (boolean)
+        intent.putExtra(SummaryActivity.EXTRA_CATEGORY, spCategory.getSelectedItem().toString());
+        intent.putExtra(SummaryActivity.EXTRA_DESCRIPTION, etDescription.getText().toString().trim());
+        intent.putExtra(SummaryActivity.EXTRA_PRIORITY, sbPriority.getProgress() + 1);
+        intent.putExtra(SummaryActivity.EXTRA_URGENT, cbUrgent.isChecked());
+
         startActivity(intent);
     }
 }
