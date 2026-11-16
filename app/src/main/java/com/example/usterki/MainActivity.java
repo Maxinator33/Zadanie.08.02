@@ -10,9 +10,31 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.snackbar.Snackbar;
+
 public class MainActivity extends AppCompatActivity {
+
+    // "odbiornik odpowiedzi" z drugiego ekranu - musi być polem klasy,
+    // bo rejestracja musi istnieć zanim ekran stanie się widoczny
+    private final ActivityResultLauncher<Intent> summaryLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    // 1. przypadek: użytkownik potwierdził - pokazujemy numer
+                    String number = result.getData()
+                            .getStringExtra(SummaryActivity.EXTRA_NUMBER);
+                    Snackbar.make(findViewById(R.id.main),
+                            getString(R.string.registered, number),
+                            Snackbar.LENGTH_LONG).show();
+                } else {
+                    // 2. przypadek: zrezygnował (Wstecz albo POPRAW) - krótka informacja
+                    Toast.makeText(this, R.string.cancelled, Toast.LENGTH_SHORT).show();
+                }
+            });
 
     private Spinner spCategory;
     private EditText etDescription;
@@ -60,16 +82,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // sprawdzamy dane PRZED przejściem na drugi ekran
-    // na pierwszym błędzie pokazujemy komunikat i przerywamy (return false)
     private boolean validateForm() {
-        if (spCategory.getSelectedItemPosition() == 0) {   // 0 = "-- wybierz kategorię --"
+        if (spCategory.getSelectedItemPosition() == 0) {
             Toast.makeText(this, R.string.error_category, Toast.LENGTH_SHORT).show();
             return false;
         }
 
         if (etDescription.getText().toString().trim().isEmpty()) {
-            etDescription.setError(getString(R.string.error_description));  // czerwony błąd w polu
+            etDescription.setError(getString(R.string.error_description));
             etDescription.requestFocus();
             return false;
         }
@@ -79,17 +99,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void openSummary() {
         if (!validateForm()) {
-            return;     // dane złe, nie przechodzimy dalej
+            return;
         }
 
         Intent intent = new Intent(this, SummaryActivity.class);
-
-        // 4 dodatki: tekst, tekst, liczba (int), prawda/fałsz (boolean)
         intent.putExtra(SummaryActivity.EXTRA_CATEGORY, spCategory.getSelectedItem().toString());
         intent.putExtra(SummaryActivity.EXTRA_DESCRIPTION, etDescription.getText().toString().trim());
         intent.putExtra(SummaryActivity.EXTRA_PRIORITY, sbPriority.getProgress() + 1);
         intent.putExtra(SummaryActivity.EXTRA_URGENT, cbUrgent.isChecked());
 
-        startActivity(intent);
+        // uruchamiamy przez launcher, żeby móc odebrać odpowiedź
+        summaryLauncher.launch(intent);
     }
 }
