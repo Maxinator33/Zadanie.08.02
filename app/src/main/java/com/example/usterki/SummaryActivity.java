@@ -1,8 +1,10 @@
 package com.example.usterki;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,7 +16,6 @@ public class SummaryActivity extends AppCompatActivity {
     public static final String EXTRA_DESCRIPTION = "com.example.usterki.DESCRIPTION";
     public static final String EXTRA_PRIORITY = "com.example.usterki.PRIORITY";
     public static final String EXTRA_URGENT = "com.example.usterki.URGENT";
-    // klucz odpowiedzi odsyłanej do pierwszego ekranu
     public static final String EXTRA_NUMBER = "com.example.usterki.NUMBER";
 
     private TextView tvSummary;
@@ -28,7 +29,8 @@ public class SummaryActivity extends AppCompatActivity {
         tvSummary.setText(buildSummary());
 
         findViewById(R.id.btnConfirm).setOnClickListener(v -> confirm());
-        findViewById(R.id.btnEdit).setOnClickListener(v -> finish());   // finish bez setResult = rezygnacja
+        findViewById(R.id.btnEdit).setOnClickListener(v -> finish());
+        findViewById(R.id.btnShare).setOnClickListener(v -> share());
     }
 
     private String buildSummary() {
@@ -46,13 +48,26 @@ public class SummaryActivity extends AppCompatActivity {
         return getString(R.string.summary_format, category, description, priority, urgentText);
     }
 
-    // POTWIERDŹ: losujemy numer, odsyłamy go i zamykamy ekran
     private void confirm() {
         String number = "UST/" + (1000 + new Random().nextInt(9000));
 
         Intent result = new Intent();
         result.putExtra(EXTRA_NUMBER, number);
-        setResult(RESULT_OK, result);   // ustaw odpowiedź "OK"
-        finish();                       // finish() wysyła odpowiedź
+        setResult(RESULT_OK, result);
+        finish();
+    }
+
+    // intencja NIEJAWNA: mówimy tylko "wyślij tekst", a system sam znajduje aplikacje
+    private void share() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, tvSummary.getText().toString());
+
+        try {
+            startActivity(Intent.createChooser(intent, getString(R.string.share_via)));
+        } catch (ActivityNotFoundException e) {
+            // brak aplikacji do udostępniania = komunikat zamiast awarii
+            Toast.makeText(this, R.string.error_no_app, Toast.LENGTH_SHORT).show();
+        }
     }
 }
